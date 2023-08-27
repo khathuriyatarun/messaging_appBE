@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 const chatModel = require('../model/chat.model');
 
 // @desc      one to one chats
@@ -48,27 +49,48 @@ exports.add = async (req, res) => {
 // @query     _id  
 exports.list = async (req, res) => {
     try{
-        const { _id } = req.query;
+        const userId = req.query._id;
 
-        if(!_id) return res.status(409).send("user's Id is required")
+        if(!userId) return res.status(409).send("user's Id is required")
 
-        
         const conversations = await chatModel.aggregate([
             {
-              $match: {
-                $or: [{ from: _id }, { to: _id }],
+                $match: {
+                  $or: [{ from: new ObjectId(userId) }, { to: new ObjectId(userId) }],
+                },
               },
-            },
-            {
-              $sort: { time: -1 }, // Sort chats by time in descending order
-            }
-        ])
-
-        console.log("conversations :::: ", conversations)
+              {
+                $sort: { time: -1 },
+              },
+              {
+                $group: {
+                  _id: {
+                    $cond: [
+                      { $eq: ['$from', new ObjectId(userId)] },
+                      '$to',
+                      '$from',
+                    ],
+                  },
+                  lastMsg: { $first: '$$ROOT' },
+                },
+              },
+              {
+                $lookup: {
+                  from: 'users',
+                  localField: '_id',
+                  foreignField: '_id',
+                  as: 'userDetails',
+                },
+              },
+              {
+                $unwind: '$userDetails',
+              },
+          ]);
           
 
-        return res.status(200).send('hey hey hey');
+        return res.status(200).send(conversations);
     }catch(err){
+        console.log('err ', err)
         return res.status(400).send('Someting went wrong, Try again later');
     }    
 };

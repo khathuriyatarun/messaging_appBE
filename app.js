@@ -8,6 +8,7 @@ const xss = require('xss-clean');
 const morgan = require('morgan');
 const colors = require('colors');
 const connectDB = require('./config/db');
+const { clearOTPs } = require('./utils/cronJobs')
 
 const AuthRoutes = require('./src/routes/auth.routes')
 const UserRoutes = require('./src/routes/user.routes')
@@ -15,6 +16,9 @@ const ChatRoutes = require('./src/routes/chat.routes')
 
 // Connect to database
 connectDB();
+
+//mounting cronjobs
+clearOTPs()
 
 // Body parser
 app.use(express.json());

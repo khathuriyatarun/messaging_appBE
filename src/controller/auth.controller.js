@@ -1,5 +1,7 @@
 const userModel = require('../model/user.model');
 const otpModel = require('../model/otp.model');
+const { sendMail } = require('../../utils/mailer')
+const { otpTemplate } = require('../../utils/otp.template')
 
 
 // @desc      Authenticate or register user
@@ -17,7 +19,7 @@ exports.authenticateOrRegister = async (req, res) => {
         )
 
         if(user == null) return res.status(409).send('Something went wrong');
-        await generateOtp(user._id)
+        await generateOtp(user._id, user.email)
 
         return res.status(200).send({data : user});
     }catch(err){
@@ -48,13 +50,15 @@ exports.verify = async (req, res) => {
     }
 }
 
-async function generateOtp(userId){
+async function generateOtp(userId, userMail){
     try{
         const otp = generateRandom4DigitNumber()
         const timestamp = new Date(new Date().getTime() + 2 * 60 * 1000).toISOString();
 
         const newOtp = new otpModel({ pin : otp, validTill : timestamp, user : userId });
         await newOtp.save();
+        
+        sendMail(userMail, 'OTP to continue on messaging app' ,otpTemplate(userMail, otp))
         return
     }catch(err){
         throw err

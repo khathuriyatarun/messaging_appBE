@@ -7,8 +7,10 @@ const helmet = require('helmet');
 const xss = require('xss-clean');
 const morgan = require('morgan');
 const colors = require('colors');
+const cookieParser = require('cookie-parser')
 const connectDB = require('./config/db');
 const { clearOTPs } = require('./utils/cronJobs')
+const { verify } = require('./utils/auth.verify')
 
 const AuthRoutes = require('./src/routes/auth.routes')
 const UserRoutes = require('./src/routes/user.routes')
@@ -22,6 +24,9 @@ clearOTPs()
 
 // Body parser
 app.use(express.json());
+
+//parsing cookie
+app.use(cookieParser())
 
 // Sanitize data
 app.use(mongoSanitize());
@@ -39,6 +44,10 @@ app.use(hpp());
 app.use(cors());
 
 app.use(morgan('dev'));
+
+//mounting middleware to authenticate user
+app.use(verify)
+
 
 // Mount routers
 app.use('/api/auth', AuthRoutes);

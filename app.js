@@ -1,52 +1,38 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const hpp = require('hpp');
 const cors = require('cors');
+const PORT = 3000;
 const mongoSanitize = require('express-mongo-sanitize');
-const helmet = require('helmet');
-const xss = require('xss-clean');
-const morgan = require('morgan');
-const colors = require('colors');
+const http = require("http").createServer();
 const connectDB = require('./config/db');
-
-// Connect to database
+const AuthRoutes= require('./src/routes/auth.routes')
+// const io = require("socket.io")(http, {
+//     cors: {
+//         origin: "http://localhost:3001",
+//         methods: ["GET", "POST"]
+//     }
+// });
 connectDB();
-
-// Body parser
+app.use(cors())
 app.use(express.json());
-
-// Sanitize data
 app.use(mongoSanitize());
-
-// Set security headers
-app.use(helmet());
-
-// Prevent XSS attacks
-app.use(xss());
-
-// Prevent http param pollution
-app.use(hpp());
-
-// Enable CORS
-app.use(cors());
-
-app.use(morgan('dev'));
-
-// Mount routers
-
-const PORT = 5000;
+app.use(AuthRoutes);
 
 const server = app.listen(
-  PORT,
-  console.log(
-    `Server running on port ${PORT}`.yellow.bold
-  )
-);
-
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err, promise) => {
-    console.log(`Error: ${err.message}`.red);
-    // Close server & exit process
-    // server.close(() => process.exit(1));
-});
+    PORT,
+    console.log(
+      `Server running on port ${PORT}`
+    )
+  );
+// //Listen for a client connection 
+// io.on("connection", (socket) => {
+//     //Socket is a Link to the Client 
+//     console.log("New Client is Connected!");
+//     socket.on("welcome", (msg) => console.log(msg))
+//     //Here the client is connected and we can exchanged 
+//     //Send Message 
+//     //We need to use the Socket (the link between the server and the connected user(s)).
+// });
+// http.listen(port, () => {
+//     console.log("Server Is Running Port: " + port);
+// });

@@ -10,6 +10,7 @@ const getOTPController = async (req, res) => {
     const Mail = userData && sendMail(req.params.email, otp)
     if (Mail) {
       const otpData = await otpDetailsService({ userId: userData._id.toString(), otp: otp })
+      // const token = 
       if (otpData) return res.status(200).json({ success: true, data: userData });
     }
   } catch (error) {

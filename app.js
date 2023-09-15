@@ -7,6 +7,7 @@ const http = require("http").createServer();
 const connectDB = require('./config/db');
 const deleteOtps = require('./src/helpers/DeleteOtps')
 const AuthRoutes= require('./src/routes/auth.routes')
+const chatRoutes = require('./src/routes/chat.routes')
 // const io = require("socket.io")(http, {
 //     cors: {
 //         origin: "http://localhost:3001",
@@ -19,6 +20,7 @@ app.use(cors())
 app.use(express.json());
 app.use(mongoSanitize());
 app.use(AuthRoutes);
+app.use(chatRoutes);
 
 const server = app.listen(
     PORT,

@@ -4,7 +4,6 @@ const getUserDetails = async (userEmail) => {
     console.log("in get usersdetaisl")
     try {
         const user = await userModel.findOne({ email: userEmail })
-        console.log(user, "sdsd")
         if (user) return user
         else {
             const user = await userModel.create({ email: userEmail })
